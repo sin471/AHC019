@@ -1,6 +1,7 @@
 D = int(input())
-f = [[] for _ in range(2)]
-r = [[] for _ in range(2)]
+#Todo:中身をを01リテラル型にする
+f: list[list[str]] = [[] for _ in range(2)]
+r: list[list[str]] = [[] for _ in range(2)]
 
 f_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 r_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
