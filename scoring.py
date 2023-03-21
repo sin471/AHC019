@@ -1,14 +1,14 @@
 import pathlib
 import subprocess
 import sys
-
+from typing import List
 # Config
 INPUT_DIR_PATH = pathlib.Path(r"b36525d8_windows\tools_x86_64-pc-windows-gnu\in")
 SCORE_PATH = r"b36525d8_windows\tools_x86_64-pc-windows-gnu\vis.exe"
 OUTPUT_FILE_PATH = "output.txt"
 EXECUTE_PATH = "main.py"
 
-scores: list[int] = []
+scores: List[int] = []
 print("Calculating...")
 
 for i, input_file_path in enumerate(INPUT_DIR_PATH.iterdir(), 1):
