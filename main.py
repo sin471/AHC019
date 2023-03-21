@@ -30,13 +30,21 @@ for i in range(2):
                     continue
 
                 if f_silhouetted[i][z][x] and r_silhouetted[i][z][y]:
-                    b[i][x * (D**2) + y * D + z] = 0
                     continue
 
                 n += 1
                 b[i][x * (D**2) + y * D + z] = n
                 f_silhouetted[i][z][x] = 1
                 r_silhouetted[i][z][y] = 1
+
+    # 1組のブロックの中で2組に使い回せるものを使い回す
+    if i == 0:
+        for j, b0_j in enumerate(b[0]):
+            x, y, z = j // (D**2), (j % (D**2)) // D, j % D
+            if b0_j and f[1][z][x] and r[1][z][y]:
+                b[1][j] = b0_j
+                f_silhouetted[1][z][x] = 1
+                r_silhouetted[1][z][y] = 1
 
 
 def output(n: int, b: List[List[int]]):
