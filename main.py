@@ -3,17 +3,16 @@ from typing import List
 
 def input_():
     D = int(input())
-    f: List[List[str]] = [[] for _ in range(2)]
-    r: List[List[str]] = [[] for _ in range(2)]
+    f: List[List[List[int]]] = [[] for _ in range(2)]
+    r: List[List[List[int]]] = [[] for _ in range(2)]
 
     for i in range(2):
         for _ in range(D):
-            f[i].append(input())
+            f[i].append(list(map(int, input())))
         for _ in range(D):
-            r[i].append(input())
+            r[i].append(list(map(int, input())))
 
     return D, f, r
-
 
 
 D, f, r = input_()
@@ -27,7 +26,7 @@ for i in range(2):
     for x in range(D):
         for y in range(D):
             for z in range(D):
-                if not (f[i][z][x] == "1" and r[i][z][y] == "1"):
+                if not (f[i][z][x] == 1 and r[i][z][y] == 1):
                     continue
 
                 if f_silhouetted[i][z][x] and r_silhouetted[i][z][y]:
