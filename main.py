@@ -1,17 +1,25 @@
-D = int(input())
-#Todo:中身をを01リテラル型にする
-f: list[list[str]] = [[] for _ in range(2)]
-r: list[list[str]] = [[] for _ in range(2)]
+from typing import List
+
+
+def input_():
+    D = int(input())
+    f: List[List[str]] = [[] for _ in range(2)]
+    r: List[List[str]] = [[] for _ in range(2)]
+
+    for i in range(2):
+        for _ in range(D):
+            f[i].append(input())
+        for _ in range(D):
+            r[i].append(input())
+
+    return D, f, r
+
+
+
+D, f, r = input_()
 
 f_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 r_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
-
-for i in range(2):
-    for _ in range(D):
-        f[i].append(input())
-    for _ in range(D):
-        r[i].append(input())
-
 b = [[0 for _ in range(D**3)] for _ in range(2)]
 n = 0
 
@@ -32,6 +40,10 @@ for i in range(2):
                 r_silhouetted[i][z][y] = 1
 
 
-print(n)
-print(" ".join(map(str, b[0])))
-print(" ".join(map(str, b[1])))
+def output(n: int, b: List[List[int]]):
+    print(n)
+    print(" ".join(map(str, b[0])))
+    print(" ".join(map(str, b[1])))
+
+
+output(n, b)
