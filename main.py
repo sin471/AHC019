@@ -39,10 +39,13 @@ for i in range(2):
 
     # 1組のブロックの中で2組に使い回せるものを使い回す
     if i == 0:
-        for j, b0_j in enumerate(b[0]):
+        b0_cnt = max(b[0])
+        b1_cnt = 0
+        for j, _ in enumerate(b[0]):
             x, y, z = j // (D**2), (j % (D**2)) // D, j % D
-            if b0_j and f[1][z][x] and r[1][z][y]:
-                b[1][j] = b0_j
+            if f[1][z][x] and r[1][z][y] and b1_cnt < b0_cnt:
+                b1_cnt += 1
+                b[1][j] = b1_cnt
                 f_silhouetted[1][z][x] = 1
                 r_silhouetted[1][z][y] = 1
 
