@@ -1,6 +1,6 @@
 from typing import List
-
-
+#todo:共通部分を上下ではなく縦または横で探す
+#todo:f_silhouettedとr_silhouettedをまとめられないか考える
 def input_():
     D = int(input())
     f: List[List[List[int]]] = [[] for _ in range(2)]
