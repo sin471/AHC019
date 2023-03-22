@@ -43,8 +43,8 @@ for x in range(D):
                     n += 1
                 for i in range(2):
                     b[i][x * (D**2) + y * D + z2] = n
-                    f_silhouetted[i][z][x] = 1
-                    r_silhouetted[i][z][y] = 1
+                    f_silhouetted[i][z2][x] = 1
+                    r_silhouetted[i][z2][y] = 1
                 z2 += 1
             z = z2
             z += 1
