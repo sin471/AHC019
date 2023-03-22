@@ -1,6 +1,7 @@
 from typing import List
-#todo:共通部分を上下ではなく縦または横で探す
-#todo:f_silhouettedとr_silhouettedをまとめられないか考える
+
+# todo:共通部分を上下ではなく縦または横で探す
+# todo:f_silhouettedとr_silhouettedをまとめられないか考える
 def input_():
     D = int(input())
     f: List[List[List[int]]] = [[] for _ in range(2)]
@@ -33,21 +34,21 @@ for i in range(2):
 
 
 # 1組と2組どちらでも共通して埋めれる場所を探す
-for x in range(D):
+for z in range(D):
     for y in range(D):
-        z = 0
-        while z < D:
-            z2 = z
-            while z2 < D and can_filled[0][x][y][z2] and can_filled[1][x][y][z2]:
-                if z2 == z:
+        x = 0
+        while x < D:
+            x2 = x
+            while x2 < D and can_filled[0][x2][y][z] and can_filled[1][x2][y][z]:
+                if x2 == x:
                     n += 1
                 for i in range(2):
-                    b[i][x * (D**2) + y * D + z2] = n
-                    f_silhouetted[i][z2][x] = 1
-                    r_silhouetted[i][z2][y] = 1
-                z2 += 1
-            z = z2
-            z += 1
+                    b[i][x2 * (D**2) + y * D + z] = n
+                    f_silhouetted[i][z][x2] = 1
+                    r_silhouetted[i][z][y] = 1
+                x2 += 1
+            x = x2
+            x += 1
 
 for i in range(2):
     n2 = n + 1
