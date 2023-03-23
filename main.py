@@ -1,6 +1,6 @@
 from typing import List
 
-# todo:共通部分を上下ではなく縦または横で探す
+
 # todo:f_silhouettedとr_silhouettedをまとめられないか考える
 def input_():
     D = int(input())
@@ -18,19 +18,17 @@ def input_():
 
 D, f, r = input_()
 
+xyz = [(i, j, k) for i in range(D) for j in range(D) for k in range(D)]
 f_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 r_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 can_filled = [[[[0] * D for _ in range(D)] for _ in range(D)] for _ in range(2)]
-
 b = [[0 for _ in range(D**3)] for _ in range(2)]
 n = 0
 
 for i in range(2):
-    for x in range(D):
-        for y in range(D):
-            for z in range(D):
-                if f[i][z][x] == 1 and r[i][z][y] == 1:
-                    can_filled[i][x][y][z] = 1
+    for x, y, z in xyz:
+        if f[i][z][x] == 1 and r[i][z][y] == 1:
+            can_filled[i][x][y][z] = 1
 
 
 # 1組と2組どちらでも共通して埋めれる場所を探す
@@ -53,20 +51,18 @@ for x in range(D):
 
 for i in range(2):
     n2 = n + 1
-    for x in range(D):
-        for y in range(D):
-            for z in range(D):
-                if f_silhouetted[i][z][x] and r_silhouetted[i][z][y]:
-                    continue
-                if not can_filled[i][x][y][z]:
-                    continue
-                if b[i][x * (D**2) + y * D + z]:
-                    continue
+    for x, y, z in xyz:
+        if f_silhouetted[i][z][x] and r_silhouetted[i][z][y]:
+            continue
+        if not can_filled[i][x][y][z]:
+            continue
+        if b[i][x * (D**2) + y * D + z]:
+            continue
 
-                b[i][x * (D**2) + y * D + z] = n2
-                f_silhouetted[i][z][x] = 1
-                r_silhouetted[i][z][y] = 1
-                n2 += 1
+        b[i][x * (D**2) + y * D + z] = n2
+        f_silhouetted[i][z][x] = 1
+        r_silhouetted[i][z][y] = 1
+        n2 += 1
 
 
 def output(n: int, b: List[List[int]]):
