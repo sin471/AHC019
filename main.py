@@ -1,7 +1,5 @@
 from typing import List
 
-
-# todo:f_silhouettedとr_silhouettedをまとめられないか考える
 def input_():
     D = int(input())
     f: List[List[List[int]]] = [[] for _ in range(2)]
@@ -30,7 +28,7 @@ n = 0
 
 for x, y, z in xyz:
     for i in range(2):
-        if f[i][z][x] == 1 and r[i][z][y] == 1:
+        if f[i][z][x] and r[i][z][y]:
             can_filled[i][x][y][z] = 1
 
     if can_filled[0][x][y][z] and can_filled[1][x][y][z]:
