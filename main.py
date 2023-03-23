@@ -1,6 +1,7 @@
 from typing import List
-#todo:共通部分を上下ではなく縦または横で探す
-#todo:f_silhouettedとr_silhouettedをまとめられないか考える
+
+# todo:共通部分を上下ではなく縦または横で探す
+# todo:f_silhouettedとr_silhouettedをまとめられないか考える
 def input_():
     D = int(input())
     f: List[List[List[int]]] = [[] for _ in range(2)]
@@ -33,6 +34,7 @@ for i in range(2):
 
 
 # 1組と2組どちらでも共通して埋めれる場所を探す
+# 共通ブロック判定の基準軸を変えたときの評価値(低いほどいい)は500ケースでもy<x<zの順だった
 for x in range(D):
     for z in range(D):
         y = 0
