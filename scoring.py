@@ -11,7 +11,7 @@ OUTPUT_FILE_PATH = pathlib.Path(r"output.txt")
 EXECUTE_PATH = pathlib.Path(r"main.py")
 SEED_PATH = pathlib.Path(r"b36525d8_windows\tools_x86_64-pc-windows-gnu\seeds.txt")
 GENERATOR_PATH = pathlib.Path(r"b36525d8_windows\tools_x86_64-pc-windows-gnu\gen.exe")
-SEED_CNT = 300
+SEED_CNT = 100
 # 大して時間はかからないし、生成し忘れることもなくなるので入力のテキストファイルは毎回生成することにした
 
 
@@ -49,7 +49,7 @@ scores: List[int] = []
 print("Calculating...")
 
 input_files = list(INPUT_DIR_PATH.iterdir())
-for i, input_file_path in enumerate(input_files, 1):
+for i, input_file_path in enumerate(input_files):
     execute_command = (
         f"{sys.executable} {EXECUTE_PATH} < {input_file_path} > {OUTPUT_FILE_PATH}"
     )
@@ -61,7 +61,7 @@ for i, input_file_path in enumerate(input_files, 1):
     )
     score = format_score(score_process.stdout)
     scores.append(score)
-    print(f"Case{i} Done")
+    print(f"Seed{i} Done")
 
 with open("score.txt", "a") as f:
     print(f"score = {sum(scores)}({len(input_files)}case)", file=f)
