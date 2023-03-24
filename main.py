@@ -83,6 +83,43 @@ for x, y, z in xyz:
         n += 1
         fill_connected_component(x, y, z, n)
 
+# 2x1x1の形のブロックでシルエットがまだない部分をすべて埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
+n2 = 0
+for i in range(2):
+    n2 = n + 1
+    for x, y, z in xyz:
+        if not can_filled[i][x][y][z]:
+            continue
+        if is_silhouetted(i, x, y, z):
+            continue
+
+        for dx, dy, dz in diff:
+            if not is_inside(x + dx, y + dy, z + dz):
+                continue
+            if not can_filled[i][x + dx][y + dy][z + dz]:
+                continue
+
+            can_filled[i][x][y][z] = 0
+            can_filled[i][x + dx][y + dy][z + dz] = 0
+            silhouette(i, x, y, z)
+            silhouette(i, x + dx, y + dy, z + dz)
+            b[i][positon_1d(x, y, z)] = n2
+            b[i][positon_1d(x + dx, y + dy, z + dz)] = n2
+            n2 += 1
+
+            break
+
+# 2x1ブロックの数を少ない方の組に合わせる
+i = 0 if max(b[0]) > max(b[1]) else 1
+# range(a1,a2)はa1>=a2のときループもエラーもしない
+for x, y, z in xyz:
+    position = positon_1d(x, y, z)
+    tmp = min(max(b[0]), max(b[1]))
+    if b[i][position] > tmp:
+        b[i][position] = 0
+        can_filled[i][x][y][z] = 1
+        f_silhouetted[i][z][x] = 0
+        r_silhouetted[i][z][y] = 0
 
 # 1x1x1のブロックで残りを埋める
 n = max(*b[0], *b[1])
