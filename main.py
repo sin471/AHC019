@@ -26,7 +26,6 @@ diff = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
 b = [[0 for _ in range(D**3)] for _ in range(2)]
 n = 0
 
-
 for x, y, z in xyz:
     for i in range(2):
         if f[i][z][x] and r[i][z][y]:
@@ -70,8 +69,7 @@ def fill_connected_component(x: int, y: int, z: int, n: int):
     b[0][position] = b[1][position] = n
     is_overlapped[x][y][z] = 0
     for i in range(2):
-        f_silhouetted[i][z][x] = 1
-        r_silhouetted[i][z][y] = 1
+        silhouette(i, x, y, z)
         can_filled[i][x][y][z] = 0
 
     for dx, dy, dz in diff:
@@ -83,8 +81,8 @@ for x, y, z in xyz:
         n += 1
         fill_connected_component(x, y, z, n)
 
-# 2x1x1の形のブロックでシルエットがまだない部分をすべて埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
-n2 = 0
+
+# 2x1x1の形のブロックでシルエットがまだない部分をできるだけ埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
 for i in range(2):
     n2 = n + 1
     for x, y, z in xyz:
@@ -94,28 +92,29 @@ for i in range(2):
             continue
 
         for dx, dy, dz in diff:
-            if not is_inside(x + dx, y + dy, z + dz):
+            x2 = x + dx
+            y2 = y + dy
+            z2 = z + dz
+            if not is_inside(x2, y2, z2):
                 continue
-            if not can_filled[i][x + dx][y + dy][z + dz]:
+            if not can_filled[i][x2][y2][z2]:
                 continue
 
             can_filled[i][x][y][z] = 0
-            can_filled[i][x + dx][y + dy][z + dz] = 0
+            can_filled[i][x2][y2][z2] = 0
             silhouette(i, x, y, z)
-            silhouette(i, x + dx, y + dy, z + dz)
+            silhouette(i, x2, y2, z2)
             b[i][positon_1d(x, y, z)] = n2
-            b[i][positon_1d(x + dx, y + dy, z + dz)] = n2
+            b[i][positon_1d(x2, y2, z2)] = n2
             n2 += 1
-
             break
 
-# 2x1ブロックの数を少ない方の組に合わせる
+# 2x1x1ブロックの数が多い方の組(iとする)を少ない方の組に合わせる
 i = 0 if max(b[0]) > max(b[1]) else 1
-# range(a1,a2)はa1>=a2のときループもエラーもしない
+b_max_min = min(max(b[0]), max(b[1]))
 for x, y, z in xyz:
     position = positon_1d(x, y, z)
-    tmp = min(max(b[0]), max(b[1]))
-    if b[i][position] > tmp:
+    if b[i][position] > b_max_min:
         b[i][position] = 0
         can_filled[i][x][y][z] = 1
         f_silhouetted[i][z][x] = 0
