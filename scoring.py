@@ -1,8 +1,7 @@
 import pathlib
+import shutil
 import subprocess as sub
 import sys
-import shutil
-from typing import List
 
 # Config
 INPUT_DIR_PATH = pathlib.Path(r"b36525d8_windows\tools_x86_64-pc-windows-gnu\in")
@@ -27,12 +26,7 @@ def format_score(score_process_output: str):
     return int(score)
 
 
-def generate_testcase(
-    SEED_PATH: pathlib.Path,
-    GENERATOR_PATH: pathlib.Path,
-    INPUT_DIR_PATH: pathlib.Path,
-    SEED_CNT: int,
-):
+def generate_testcase(SEED_CNT: int):
     print(f"Generating {SEED_CNT}Case")
     shutil.rmtree(INPUT_DIR_PATH)
     INPUT_DIR_PATH.mkdir()
@@ -43,11 +37,10 @@ def generate_testcase(
     sub.run(generate_command)
 
 
-generate_testcase(SEED_PATH, GENERATOR_PATH, INPUT_DIR_PATH, SEED_CNT)
+generate_testcase(SEED_CNT)
 
-scores: List[int] = []
 print("Calculating...")
-
+score: int = 0
 input_files = list(INPUT_DIR_PATH.iterdir())
 for i, input_file_path in enumerate(input_files):
     execute_command = (
@@ -59,9 +52,8 @@ for i, input_file_path in enumerate(input_files):
     score_process = sub.run(
         score_command, shell=True, stdout=sub.PIPE, universal_newlines=True
     )
-    score = format_score(score_process.stdout)
-    scores.append(score)
+    score += format_score(score_process.stdout)
     print(f"Seed{i} Done")
 
 with open("score.txt", "a") as f:
-    print(f"score = {sum(scores)}({len(input_files)}case)", file=f)
+    print(f"score = {score}({len(input_files)}case)", file=f)
