@@ -116,8 +116,8 @@ for x, y, z in xyz:
         b[i][position] = 0
         can_filled[i][x][y][z] = 1
 
-        r_silhouetted[i][z][y] = any(b[i][positon_1d(x2,y,z)] for x2 in range(D))
-        f_silhouetted[i][z][x] = any(b[i][positon_1d(x,y2,z)] for y2 in range(D))
+        r_silhouetted[i][z][y] = any(b[i][positon_1d(x2, y, z)] for x2 in range(D))
+        f_silhouetted[i][z][x] = any(b[i][positon_1d(x, y2, z)] for y2 in range(D))
 
 # 1x1x1のブロックで残りを埋める
 n = max(*b[0], *b[1])
