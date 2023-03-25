@@ -47,8 +47,6 @@ def is_silhouetted(i: int, x: int, y: int, z: int):
     return f_silhouetted[i][z][x] and r_silhouetted[i][z][y]
 
 
-# silhouetted[i][x][y][z]という配列を用意すると、for文で1行埋めねばならず面倒になる
-# todo:関数化したらそれでもいいかも
 def silhouette(i: int, x: int, y: int, z: int):
     global f_silhouetted
     global r_silhouetted
@@ -117,8 +115,9 @@ for x, y, z in xyz:
     if b[i][position] > b_max_min:
         b[i][position] = 0
         can_filled[i][x][y][z] = 1
-        f_silhouetted[i][z][x] = 0
-        r_silhouetted[i][z][y] = 0
+
+        r_silhouetted[i][z][y] = any(b[i][positon_1d(x2,y,z)] for x2 in range(D))
+        f_silhouetted[i][z][x] = any(b[i][positon_1d(x,y2,z)] for y2 in range(D))
 
 # 1x1x1のブロックで残りを埋める
 n = max(*b[0], *b[1])
