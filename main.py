@@ -75,9 +75,17 @@ def fill_connected_component(x: int, y: int, z: int, n: int):
 
 
 for x, y, z in xyz:
-    if is_overlapped[x][y][z]:
-        n += 1
-        fill_connected_component(x, y, z, n)
+    if not is_overlapped[x][y][z]:
+        continue
+    # 隣接した共通ブロックがあるとき(1x1x1でないとき)のみ埋める
+    for dx, dy, dz in diff:
+        x2 = x + dx
+        y2 = y + dy
+        z2 = z + dz
+        if is_inside(x2, y2, z2) and is_overlapped[x2][y2][z2]:
+            n += 1
+            fill_connected_component(x, y, z, n)
+            break
 
 
 # 2x1x1の形のブロックでシルエットがまだない部分をできるだけ埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
