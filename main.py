@@ -37,8 +37,9 @@ for x, y, z in xyz:
         is_overlapped[x][y][z] = 1
 
 
-def is_inside(x: int, y: int, z: int):
-    return 0 <= x < D and 0 <= y < D and 0 <= z < D
+def can_fill(x: int, y: int, z: int, i: int = 0):
+    is_inside = 0 <= x < D and 0 <= y < D and 0 <= z < D
+    return is_inside and can_filled[i][x][y][z]
 
 
 def positon_1d(x: int, y: int, z: int):
@@ -63,7 +64,7 @@ def fill_connected_component(x: int, y: int, z: int, block_id: int):
     global can_filled
     global f_silhouetted
     global r_silhouetted
-    if not (is_inside(x, y, z) and is_overlapped[x][y][z]):
+    if not (can_fill(x, y, z) and is_overlapped[x][y][z]):
         return
     position = positon_1d(x, y, z)
     b[0][position] = b[1][position] = block_id
@@ -81,11 +82,11 @@ for x, y, z in xyz:
         # 隣接した共通ブロックがあるとき(1x1x1でないとき)のみ埋める
         for dx, dy, dz in diff:
             x2, y2, z2 = x + dx, y + dy, z + dz
-            if is_inside(x2, y2, z2) and is_overlapped[x2][y2][z2]:
+            if can_fill(x2, y2, z2) and is_overlapped[x2][y2][z2]:
                 block_id += 1
                 fill_connected_component(x, y, z, block_id)
                 break
-#TODO:先に2x2x1の正方形で埋める
+# TODO:先に2x2x1の正方形で埋める
 # L字型の体積3のブロックで埋める
 for i in range(2):
     block_id2 = block_id + 1
@@ -95,10 +96,9 @@ for i in range(2):
         for (dx1, dy1, dz1), (dx2, dy2, dz2) in zip(diff, [diff[-1]] + diff[:-1]):
             x2, y2, z2 = x + dx1, y + dy1, z + dz1
             x3, y3, z3 = x + dx2, y + dy2, z + dz2
-            # TODO:def can_filled()でis_insideとcan_filledを統合
             # TODO:x2,x2,fill_insideなどをリネーム
-            fill_inside2 = is_inside(x2, y2, z2) and can_filled[i][x2][y2][z2]
-            fill_inside3 = is_inside(x3, y3, z3) and can_filled[i][x3][y3][z3]
+            fill_inside2 = can_fill(x2, y2, z2, i)
+            fill_inside3 = can_fill(x3, y3, z3, i)
             if not (fill_inside2 and fill_inside3):
                 continue
 
@@ -141,7 +141,7 @@ for i in range(2):
 
         for dx, dy, dz in diff:
             x2, y2, z2 = x + dx, y + dy, z + dz
-            if not (is_inside(x2, y2, z2) and can_filled[i][x2][y2][z2]):
+            if not can_fill(x, y, z, i):
                 continue
 
             can_filled[i][x][y][z] = 0
