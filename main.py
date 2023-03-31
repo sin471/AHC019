@@ -16,15 +16,14 @@ def input_():
 
 
 D, f, r = input_()
-
-xyz = [(i, j, k) for i in range(D) for j in range(D) for k in range(D)]
+xyz = [(x, y, z) for x in range(D) for y in range(D) for z in range(D)]
 f_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 r_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 can_filled = [[[[0] * D for _ in range(D)] for _ in range(D)] for _ in range(2)]
 is_overlapped = [[[0] * D for _ in range(D)] for _ in range(D)]
 diff = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
 b = [[0 for _ in range(D**3)] for _ in range(2)]
-n = 0
+block_id = 0
 
 for x, y, z in xyz:
     for i in range(2):
@@ -55,7 +54,7 @@ def silhouette(i: int, x: int, y: int, z: int):
 
 
 # 共通した連結成分をDFSで埋める
-def fill_connected_component(x: int, y: int, z: int, n: int):
+def fill_connected_component(x: int, y: int, z: int, block_id: int):
     global b
     global is_overlapped
     global can_filled
@@ -64,14 +63,14 @@ def fill_connected_component(x: int, y: int, z: int, n: int):
     if not (is_inside(x, y, z) and is_overlapped[x][y][z]):
         return
     position = positon_1d(x, y, z)
-    b[0][position] = b[1][position] = n
+    b[0][position] = b[1][position] = block_id
     is_overlapped[x][y][z] = 0
     for i in range(2):
         silhouette(i, x, y, z)
         can_filled[i][x][y][z] = 0
 
     for dx, dy, dz in diff:
-        fill_connected_component(x + dx, y + dy, z + dz, n)
+        fill_connected_component(x + dx, y + dy, z + dz, block_id)
 
 
 for x, y, z in xyz:
@@ -83,14 +82,14 @@ for x, y, z in xyz:
         y2 = y + dy
         z2 = z + dz
         if is_inside(x2, y2, z2) and is_overlapped[x2][y2][z2]:
-            n += 1
-            fill_connected_component(x, y, z, n)
+            block_id += 1
+            fill_connected_component(x, y, z, block_id)
             break
 
 
 # 2x1x1の形のブロックでシルエットがまだない部分をできるだけ埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
 for i in range(2):
-    n2 = n + 1
+    block_id2 = block_id + 1
     for x, y, z in xyz:
         if not can_filled[i][x][y][z]:
             continue
@@ -110,9 +109,9 @@ for i in range(2):
             can_filled[i][x2][y2][z2] = 0
             silhouette(i, x, y, z)
             silhouette(i, x2, y2, z2)
-            b[i][positon_1d(x, y, z)] = n2
-            b[i][positon_1d(x2, y2, z2)] = n2
-            n2 += 1
+            b[i][positon_1d(x, y, z)] = block_id2
+            b[i][positon_1d(x2, y2, z2)] = block_id2
+            block_id2 += 1
             break
 
 # 2x1x1ブロックの数が多い方の組(iとする)を少ない方の組に合わせる
@@ -123,14 +122,13 @@ for x, y, z in xyz:
     if b[i][position] > b_max_min:
         b[i][position] = 0
         can_filled[i][x][y][z] = 1
-
         r_silhouetted[i][z][y] = any(b[i][positon_1d(x2, y, z)] for x2 in range(D))
         f_silhouetted[i][z][x] = any(b[i][positon_1d(x, y2, z)] for y2 in range(D))
 
 # 1x1x1のブロックで残りを埋める
-n = max(*b[0], *b[1])
+block_id = max(max(b[0]), max(b[1]))
 for i in range(2):
-    n2 = n + 1
+    block_id2 = block_id + 1
     for x, y, z in xyz:
         position = positon_1d(x, y, z)
         if is_silhouetted(i, x, y, z):
@@ -140,9 +138,9 @@ for i in range(2):
         if b[i][position]:
             continue
 
-        b[i][position] = n2
+        b[i][position] = block_id2
         silhouette(i, x, y, z)
-        n2 += 1
+        block_id2 += 1
 
 
 def output(n: int, b: List[List[int]]):
