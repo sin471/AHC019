@@ -114,6 +114,7 @@ for i in range(2):
             block_id2 += 1
             break
 
+
 # 2x1x1ブロックの数が多い方の組(iとする)を少ない方の組に合わせる
 i = 0 if max(b[0]) > max(b[1]) else 1
 b_max_min = min(max(b[0]), max(b[1]))
@@ -122,8 +123,8 @@ for x, y, z in xyz:
     if b[i][position] > b_max_min:
         b[i][position] = 0
         can_filled[i][x][y][z] = 1
-        r_silhouetted[i][z][y] = any(b[i][positon_1d(x2, y, z)] for x2 in range(D))
-        f_silhouetted[i][z][x] = any(b[i][positon_1d(x, y2, z)] for y2 in range(D))
+        r_silhouetted[i][z][y] = int(any(b[i][positon_1d(x2, y, z)] for x2 in range(D)))
+        f_silhouetted[i][z][x] = int(any(b[i][positon_1d(x, y2, z)] for y2 in range(D)))
 
 # 1x1x1のブロックで残りを埋める
 block_id = max(max(b[0]), max(b[1]))
