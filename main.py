@@ -100,10 +100,7 @@ for i in range(2):
         for (dx1, dy1, dz1), (dx2, dy2, dz2) in zip(diff, [diff[-1]] + diff[:-1]):
             x2, y2, z2 = x + dx1, y + dy1, z + dz1
             x3, y3, z3 = x + dx2, y + dy2, z + dz2
-            # TODO:x2,x2,fill_insideなどをリネーム
-            fill_inside2 = can_fill(x2, y2, z2, i)
-            fill_inside3 = can_fill(x3, y3, z3, i)
-            if not (fill_inside2 and fill_inside3):
+            if not (can_fill(x2, y2, z2, i) and can_fill(x3, y3, z3, i)):
                 continue
 
             can_filled[i][x][y][z] = 0
@@ -164,7 +161,7 @@ for i in range(2):
             block_id2 += 1
             break
 
-# 2x1x1ブロックの数が多い方の組(more)を少ない方の組に合わせる
+# 2x1x1ブロックの数が多い方の組を少ない方の組に合わせる
 equalize_block_cnt_to_fewer()
 
 # 1x1x1のブロックで残りを埋める
