@@ -118,10 +118,10 @@ for x, y, z in xyz:
         b[more][position] = 0
         can_filled[more][x][y][z] = 1
 
-        does_rsilhouette_fade = any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
-        does_fsilhouette_fade = any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
-        r_silhouetted[more][z][y] = int(does_rsilhouette_fade)
-        f_silhouetted[more][z][x] = int(does_fsilhouette_fade)
+        has_r_silhouette_faded = any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
+        has_f_silhouette_faded = any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
+        r_silhouetted[more][z][y] = int(has_r_silhouette_faded)
+        f_silhouetted[more][z][x] = int(has_f_silhouette_faded)
 
 # 1x1x1のブロックで残りを埋める
 block_id = max(max(b[0]), max(b[1]))
