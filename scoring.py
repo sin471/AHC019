@@ -38,13 +38,16 @@ def generate_testcase(SEED_CNT: int):
 
 
 generate_testcase(SEED_CNT)
+# スコア計算中に実行ファイルを編集するとエラーになるので、コピーしたもの実行ファイルとしてを使う
+NEW_EXECUTE_PATH = EXECUTE_PATH.with_stem(f"copied_{EXECUTE_PATH.stem}")
+shutil.copy(EXECUTE_PATH, NEW_EXECUTE_PATH)
 
 print("Calculating...")
 score: int = 0
 input_files = list(INPUT_DIR_PATH.iterdir())
 for i, input_file_path in enumerate(input_files):
     execute_command = (
-        f"{sys.executable} {EXECUTE_PATH} < {input_file_path} > {OUTPUT_FILE_PATH}"
+        f"{sys.executable} {NEW_EXECUTE_PATH} < {input_file_path} > {OUTPUT_FILE_PATH}"
     )
     score_command = f"{SCORE_PATH} {input_file_path} {OUTPUT_FILE_PATH}"
     # shell=Trueでは、インジェクション攻撃が可能となるため、内容不明の変数を含めない
@@ -55,5 +58,6 @@ for i, input_file_path in enumerate(input_files):
     score += format_score(score_process.stdout)
     print(f"Seed{i} Done")
 
+NEW_EXECUTE_PATH.unlink()
 with open("score.txt", "a") as f:
     print(f"score = {score}({len(input_files)}case)", file=f)
