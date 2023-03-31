@@ -117,12 +117,11 @@ for x, y, z in xyz:
     if b[more][position] > fewer_max:
         b[more][position] = 0
         can_filled[more][x][y][z] = 1
-        r_silhouetted[more][z][y] = int(
-            any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
-        )
-        f_silhouetted[more][z][x] = int(
-            any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
-        )
+
+        does_rsilhouette_fade = any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
+        does_fsilhouette_fade = any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
+        r_silhouetted[more][z][y] = int(does_rsilhouette_fade)
+        f_silhouetted[more][z][x] = int(does_fsilhouette_fade)
 
 # 1x1x1のブロックで残りを埋める
 block_id = max(max(b[0]), max(b[1]))
