@@ -91,7 +91,7 @@ for x, y, z in xyz:
 for i in range(2):
     block_id2 = block_id + 1
     for x, y, z in xyz:
-        if is_silhouetted(i, x, y, z) or not can_filled[i][x][y][z]:
+        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
             continue
         for (dx1, dy1, dz1), (dx2, dy2, dz2) in zip(diff, [diff[-1]] + diff[:-1]):
             x2, y2, z2 = x + dx1, y + dy1, z + dz1
@@ -113,6 +113,7 @@ for i in range(2):
             b[i][positon_1d(x3, y3, z3)] = block_id2
             block_id2 += 1
             break
+
 
 def equalize_block_cnt_to_fewer():
     global b
@@ -143,12 +144,12 @@ block_id = max(max(b[0]), max(b[1]))
 for i in range(2):
     block_id2 = block_id + 1
     for x, y, z in xyz:
-        if is_silhouetted(i, x, y, z) or not can_filled[i][x][y][z]:
+        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
             continue
 
         for dx, dy, dz in diff:
             x2, y2, z2 = x + dx, y + dy, z + dz
-            if not can_fill(x, y, z, i):
+            if not can_fill(x2, y2, z2, i):
                 continue
 
             can_filled[i][x][y][z] = 0
@@ -169,7 +170,7 @@ for i in range(2):
     block_id2 = block_id + 1
     for x, y, z in xyz:
         position = positon_1d(x, y, z)
-        if not can_filled[i][x][y][z]:
+        if not can_fill(x,y,z,i):
             continue
         if b[i][position] == 0 and not is_silhouetted(i, x, y, z):
             b[i][position] = block_id2
