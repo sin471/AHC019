@@ -114,19 +114,26 @@ for i in range(2):
             block_id2 += 1
             break
 
-# 体積3のL字ブロックの数が多い方の組(more)を少ない方の組に合わせる
-more = 0 if max(b[0]) > max(b[1]) else 1
-fewer_max = min(max(b[0]), max(b[1]))
-for x, y, z in xyz:
-    position = positon_1d(x, y, z)
-    if b[more][position] > fewer_max:
-        b[more][position] = 0
-        can_filled[more][x][y][z] = 1
+def equalize_block_cnt_to_fewer():
+    global b
+    global f_silhouetted
+    global r_silhouetted
+    more = 0 if max(b[0]) > max(b[1]) else 1
+    fewer_max = min(max(b[0]), max(b[1]))
+    for x, y, z in xyz:
+        position = positon_1d(x, y, z)
+        if b[more][position] > fewer_max:
+            b[more][position] = 0
+            can_filled[more][x][y][z] = 1
 
-        has_r_silhouette_faded = any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
-        has_f_silhouette_faded = any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
-        r_silhouetted[more][z][y] = int(has_r_silhouette_faded)
-        f_silhouetted[more][z][x] = int(has_f_silhouette_faded)
+            r_silhouette_faded = any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
+            f_silhouette_faded = any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
+            r_silhouetted[more][z][y] = int(r_silhouette_faded)
+            f_silhouetted[more][z][x] = int(f_silhouette_faded)
+
+
+# 体積3のL字ブロックの数が多い方の組(more)を少ない方の組に合わせる
+equalize_block_cnt_to_fewer()
 
 # TODO:max_b()を定義する
 # TODO:block_idのうまいやり方を考える
@@ -154,18 +161,7 @@ for i in range(2):
             break
 
 # 2x1x1ブロックの数が多い方の組(more)を少ない方の組に合わせる
-more = 0 if max(b[0]) > max(b[1]) else 1
-fewer_max = min(max(b[0]), max(b[1]))
-for x, y, z in xyz:
-    position = positon_1d(x, y, z)
-    if b[more][position] > fewer_max:
-        b[more][position] = 0
-        can_filled[more][x][y][z] = 1
-
-        has_r_silhouette_faded = any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
-        has_f_silhouette_faded = any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
-        r_silhouetted[more][z][y] = int(has_r_silhouette_faded)
-        f_silhouetted[more][z][x] = int(has_f_silhouette_faded)
+equalize_block_cnt_to_fewer()
 
 # 1x1x1のブロックで残りを埋める
 block_id = max(max(b[0]), max(b[1]))
