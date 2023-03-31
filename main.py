@@ -77,31 +77,26 @@ def fill_connected_component(x: int, y: int, z: int, block_id: int):
 
 
 for x, y, z in xyz:
-    if not is_overlapped[x][y][z]:
-        continue
-    # 隣接した共通ブロックがあるとき(1x1x1でないとき)のみ埋める
-    for dx, dy, dz in diff:
-        x2, y2, z2 = x + dx, y + dy, z + dz
-        if is_inside(x2, y2, z2) and is_overlapped[x2][y2][z2]:
-            block_id += 1
-            fill_connected_component(x, y, z, block_id)
-            break
+    if is_overlapped[x][y][z]:
+        # 隣接した共通ブロックがあるとき(1x1x1でないとき)のみ埋める
+        for dx, dy, dz in diff:
+            x2, y2, z2 = x + dx, y + dy, z + dz
+            if is_inside(x2, y2, z2) and is_overlapped[x2][y2][z2]:
+                block_id += 1
+                fill_connected_component(x, y, z, block_id)
+                break
 
 
 # 2x1x1の形のブロックでシルエットがまだない部分をできるだけ埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
 for i in range(2):
     block_id2 = block_id + 1
     for x, y, z in xyz:
-        if not can_filled[i][x][y][z]:
-            continue
-        if is_silhouetted(i, x, y, z):
+        if is_silhouetted(i, x, y, z) or not can_filled[i][x][y][z]:
             continue
 
         for dx, dy, dz in diff:
             x2, y2, z2 = x + dx, y + dy, z + dz
-            if not is_inside(x2, y2, z2):
-                continue
-            if not can_filled[i][x2][y2][z2]:
+            if not (is_inside(x2, y2, z2) and can_filled[i][x2][y2][z2]):
                 continue
 
             can_filled[i][x][y][z] = 0
@@ -131,16 +126,12 @@ for i in range(2):
     block_id2 = block_id + 1
     for x, y, z in xyz:
         position = positon_1d(x, y, z)
-        if is_silhouetted(i, x, y, z):
-            continue
         if not can_filled[i][x][y][z]:
             continue
-        if b[i][position]:
-            continue
-
-        b[i][position] = block_id2
-        silhouette(i, x, y, z)
-        block_id2 += 1
+        if b[i][position] == 0 and not is_silhouetted(i, x, y, z):
+            b[i][position] = block_id2
+            silhouette(i, x, y, z)
+            block_id2 += 1
 
 
 def output(n: int, b: List[List[int]]):
