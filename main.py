@@ -46,6 +46,10 @@ def positon_1d(x: int, y: int, z: int):
     return x * (D**2) + y * D + z
 
 
+def max_2d(lis: List[List]):
+    return max(map(lambda inner: max(inner), lis))
+
+
 def is_silhouetted(i: int, x: int, y: int, z: int):
     return f_silhouetted[i][z][x] and r_silhouetted[i][z][y]
 
@@ -136,9 +140,8 @@ def equalize_block_cnt_to_fewer():
 # 体積3のL字ブロックの数が多い方の組(more)を少ない方の組に合わせる
 equalize_block_cnt_to_fewer()
 
-# TODO:max_b()を定義する
 # TODO:block_idのうまいやり方を考える
-block_id = max(max(b[0]), max(b[1]))
+block_id = max_2d(b)
 
 # 2x1x1の形のブロックでシルエットがまだない部分をできるだけ埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
 for i in range(2):
@@ -165,12 +168,12 @@ for i in range(2):
 equalize_block_cnt_to_fewer()
 
 # 1x1x1のブロックで残りを埋める
-block_id = max(max(b[0]), max(b[1]))
+block_id = max_2d(b)
 for i in range(2):
     block_id2 = block_id + 1
     for x, y, z in xyz:
         position = positon_1d(x, y, z)
-        if not can_fill(x,y,z,i):
+        if not can_fill(x, y, z, i):
             continue
         if b[i][position] == 0 and not is_silhouetted(i, x, y, z):
             b[i][position] = block_id2
@@ -184,5 +187,5 @@ def output(n: int, b: List[List[int]]):
     print(" ".join(map(str, b[1])))
 
 
-n = max(max(b[0]), max(b[1]))
+n = max_2d(b)
 output(n, b)
