@@ -85,7 +85,52 @@ for x, y, z in xyz:
                 block_id += 1
                 fill_connected_component(x, y, z, block_id)
                 break
+#TODO:先に2x2x1の正方形で埋める
+# L字型の体積3のブロックで埋める
+for i in range(2):
+    block_id2 = block_id + 1
+    for x, y, z in xyz:
+        if is_silhouetted(i, x, y, z) or not can_filled[i][x][y][z]:
+            continue
+        for (dx1, dy1, dz1), (dx2, dy2, dz2) in zip(diff, [diff[-1]] + diff[:-1]):
+            x2, y2, z2 = x + dx1, y + dy1, z + dz1
+            x3, y3, z3 = x + dx2, y + dy2, z + dz2
+            # TODO:def can_filled()でis_insideとcan_filledを統合
+            # TODO:x2,x2,fill_insideなどをリネーム
+            fill_inside2 = is_inside(x2, y2, z2) and can_filled[i][x2][y2][z2]
+            fill_inside3 = is_inside(x3, y3, z3) and can_filled[i][x3][y3][z3]
+            if not (fill_inside2 and fill_inside3):
+                continue
 
+            can_filled[i][x][y][z] = 0
+            can_filled[i][x2][y2][z2] = 0
+            can_filled[i][x3][y3][z3] = 0
+            silhouette(i, x, y, z)
+            silhouette(i, x2, y2, z2)
+            silhouette(i, x3, y3, z3)
+            b[i][positon_1d(x, y, z)] = block_id2
+            b[i][positon_1d(x2, y2, z2)] = block_id2
+            b[i][positon_1d(x3, y3, z3)] = block_id2
+            block_id2 += 1
+            break
+
+# 体積3のL字ブロックの数が多い方の組(more)を少ない方の組に合わせる
+more = 0 if max(b[0]) > max(b[1]) else 1
+fewer_max = min(max(b[0]), max(b[1]))
+for x, y, z in xyz:
+    position = positon_1d(x, y, z)
+    if b[more][position] > fewer_max:
+        b[more][position] = 0
+        can_filled[more][x][y][z] = 1
+
+        has_r_silhouette_faded = any(b[more][positon_1d(x2, y, z)] for x2 in range(D))
+        has_f_silhouette_faded = any(b[more][positon_1d(x, y2, z)] for y2 in range(D))
+        r_silhouetted[more][z][y] = int(has_r_silhouette_faded)
+        f_silhouetted[more][z][x] = int(has_f_silhouette_faded)
+
+# TODO:max_b()を定義する
+# TODO:block_idのうまいやり方を考える
+block_id = max(max(b[0]), max(b[1]))
 
 # 2x1x1の形のブロックでシルエットがまだない部分をできるだけ埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
 for i in range(2):
@@ -107,7 +152,6 @@ for i in range(2):
             b[i][positon_1d(x2, y2, z2)] = block_id2
             block_id2 += 1
             break
-
 
 # 2x1x1ブロックの数が多い方の組(more)を少ない方の組に合わせる
 more = 0 if max(b[0]) > max(b[1]) else 1
