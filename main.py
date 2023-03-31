@@ -16,14 +16,17 @@ def input_():
 
 
 D, f, r = input_()
+
 xyz = [(x, y, z) for x in range(D) for y in range(D) for z in range(D)]
+diff = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
+b = [[0 for _ in range(D**3)] for _ in range(2)]
+block_id = 0
+
 f_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 r_silhouetted = [[[0] * D for _ in range(D)] for _ in range(2)]
 can_filled = [[[[0] * D for _ in range(D)] for _ in range(D)] for _ in range(2)]
 is_overlapped = [[[0] * D for _ in range(D)] for _ in range(D)]
-diff = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
-b = [[0 for _ in range(D**3)] for _ in range(2)]
-block_id = 0
+
 
 for x, y, z in xyz:
     for i in range(2):
@@ -78,9 +81,7 @@ for x, y, z in xyz:
         continue
     # 隣接した共通ブロックがあるとき(1x1x1でないとき)のみ埋める
     for dx, dy, dz in diff:
-        x2 = x + dx
-        y2 = y + dy
-        z2 = z + dz
+        x2, y2, z2 = x + dx, y + dy, z + dz
         if is_inside(x2, y2, z2) and is_overlapped[x2][y2][z2]:
             block_id += 1
             fill_connected_component(x, y, z, block_id)
@@ -97,9 +98,7 @@ for i in range(2):
             continue
 
         for dx, dy, dz in diff:
-            x2 = x + dx
-            y2 = y + dy
-            z2 = z + dz
+            x2, y2, z2 = x + dx, y + dy, z + dz
             if not is_inside(x2, y2, z2):
                 continue
             if not can_filled[i][x2][y2][z2]:
