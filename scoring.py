@@ -11,6 +11,7 @@ EXECUTE_PATH = pathlib.Path(r"main.py")
 SEED_PATH = pathlib.Path(r"b36525d8_windows\tools_x86_64-pc-windows-gnu\seeds.txt")
 GENERATOR_PATH = pathlib.Path(r"b36525d8_windows\tools_x86_64-pc-windows-gnu\gen.exe")
 SEED_CNT = 100
+TIME = 6
 # 大して時間はかからないし、生成し忘れることもなくなるので入力のテキストファイルは毎回生成することにした
 
 
@@ -39,7 +40,7 @@ def generate_testcase(SEED_CNT: int):
 
 generate_testcase(SEED_CNT)
 # スコア計算中に実行ファイルを編集するとエラーになるので、コピーしたもの実行ファイルとしてを使う
-NEW_EXECUTE_PATH = EXECUTE_PATH.with_stem(f"copied_{EXECUTE_PATH.stem}")
+NEW_EXECUTE_PATH = EXECUTE_PATH.parent/"copied.py"
 shutil.copy(EXECUTE_PATH, NEW_EXECUTE_PATH)
 
 print("Calculating...")
@@ -51,7 +52,7 @@ for i, input_file_path in enumerate(input_files):
     )
     score_command = f"{SCORE_PATH} {input_file_path} {OUTPUT_FILE_PATH}"
     # shell=Trueでは、インジェクション攻撃が可能となるため、内容不明の変数を含めない
-    sub.run(execute_command, shell=True)
+    sub.run(execute_command, shell=True,timeout=TIME*0.9)
     score_process = sub.run(
         score_command, shell=True, stdout=sub.PIPE, universal_newlines=True
     )
