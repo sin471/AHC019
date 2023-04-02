@@ -18,7 +18,7 @@ def input_():
 D, f, r = input_()
 
 xyz = [(x, y, z) for x in range(D) for y in range(D) for z in range(D)]
-diff = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
+d = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
 b = [[0 for _ in range(D**3)] for _ in range(2)]
 block_id = 0
 
@@ -77,43 +77,19 @@ def fill_connected_component(x: int, y: int, z: int, block_id: int):
         silhouette(i, x, y, z)
         can_filled[i][x][y][z] = 0
 
-    for dx, dy, dz in diff:
+    for dx, dy, dz in d:
         fill_connected_component(x + dx, y + dy, z + dz, block_id)
 
 
 for x, y, z in xyz:
     if is_overlapped[x][y][z]:
         # 隣接した共通ブロックがあるとき(1x1x1でないとき)のみ埋める
-        for dx, dy, dz in diff:
+        for dx, dy, dz in d:
             x2, y2, z2 = x + dx, y + dy, z + dz
             if can_fill(x2, y2, z2) and is_overlapped[x2][y2][z2]:
                 block_id += 1
                 fill_connected_component(x, y, z, block_id)
                 break
-# TODO:先に2x2x1の正方形で埋める
-# L字型の体積3のブロックで埋める
-for i in range(2):
-    block_id2 = block_id + 1
-    for x, y, z in xyz:
-        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
-            continue
-        for (dx1, dy1, dz1), (dx2, dy2, dz2) in zip(diff, [diff[-1]] + diff[:-1]):
-            x2, y2, z2 = x + dx1, y + dy1, z + dz1
-            x3, y3, z3 = x + dx2, y + dy2, z + dz2
-            if not (can_fill(x2, y2, z2, i) and can_fill(x3, y3, z3, i)):
-                continue
-
-            can_filled[i][x][y][z] = 0
-            can_filled[i][x2][y2][z2] = 0
-            can_filled[i][x3][y3][z3] = 0
-            silhouette(i, x, y, z)
-            silhouette(i, x2, y2, z2)
-            silhouette(i, x3, y3, z3)
-            b[i][positon_1d(x, y, z)] = block_id2
-            b[i][positon_1d(x2, y2, z2)] = block_id2
-            b[i][positon_1d(x3, y3, z3)] = block_id2
-            block_id2 += 1
-            break
 
 
 def equalize_block_cnt_to_fewer():
@@ -134,6 +110,69 @@ def equalize_block_cnt_to_fewer():
             f_silhouetted[more][z][x] = int(f_silhouette_faded)
 
 
+# TODO:diffsをどうやって用意するか
+# TODO:一つサンプルを挙げたら軸違い、符号違いを全部生成するようにしたい
+# 3x3x3の中心を[0,0,0]としたベクトルでブロックを表現する。len(blocks[i])=ブロック1個の単位ブロック数
+blocks = [
+    [[1, 1, 0], [1, 0, 0], [0, 1, 0], [0, 0, 0]],
+    [[-1, 1, 0], [-1, 0, 0], [0, 1, 0], [0, 0, 0]],
+    [[1, -1, 0], [1, 0, 0], [0, -1, 0], [0, 0, 0]],
+    [[-1, -1, 0], [-1, 0, 0], [0, -1, 0], [0, 0, 0]],
+    [[0, 1, 1], [0, 0, 1], [0, 1, 0], [0, 0, 0]],
+    [[0, 1, 1], [0, 0, 1], [0, 1, 0], [0, 0, 0]],
+    [[0, -1, 1], [0, 0, 1], [0, -1, 0], [0, 0, 0]],
+    [[0, -1, 1], [0, 0, 1], [0, -1, 0], [0, 0, 0]],
+    [[1, 0, 1], [1, 0, 0], [0, 0, 1], [0, 0, 0]],
+    [[-1, 0, 1], [-1, 0, 0], [0, 0, 1], [0, 0, 0]],
+    [[1, 0, 1], [1, 0, 0], [0, 0, 1], [0, 0, 0]],
+    [[-1, 0, 1], [-1, 0, 0], [0, 0, 1], [0, 0, 0]],
+]
+
+
+for i in range(2):
+    block_id2 = block_id + 1
+    for x, y, z in xyz:
+        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
+            continue
+        for block in blocks:
+            if not all(can_fill(x + dx, y + dy, z + dz, i) for dx, dy, dz in block):
+                continue
+            for dx, dy, dz in block:
+                can_filled[i][x + dx][y + dy][z + dz] = 0
+                silhouette(i, x + dx, y + dy, z + dz)
+                b[i][positon_1d(x + dx, y + dy, z + dz)] = block_id2
+
+            block_id2 += 1
+            break
+
+
+equalize_block_cnt_to_fewer()
+block_id = max_2d(b)
+# L字型の体積3のブロックで埋める
+for i in range(2):
+    block_id2 = block_id + 1
+    for x, y, z in xyz:
+        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
+            continue
+        for (dx1, dy1, dz1), (dx2, dy2, dz2) in zip(d, [d[-1]] + d[:-1]):
+            x2, y2, z2 = x + dx1, y + dy1, z + dz1
+            x3, y3, z3 = x + dx2, y + dy2, z + dz2
+            if not (can_fill(x2, y2, z2, i) and can_fill(x3, y3, z3, i)):
+                continue
+
+            can_filled[i][x][y][z] = 0
+            can_filled[i][x2][y2][z2] = 0
+            can_filled[i][x3][y3][z3] = 0
+            silhouette(i, x, y, z)
+            silhouette(i, x2, y2, z2)
+            silhouette(i, x3, y3, z3)
+            b[i][positon_1d(x, y, z)] = block_id2
+            b[i][positon_1d(x2, y2, z2)] = block_id2
+            b[i][positon_1d(x3, y3, z3)] = block_id2
+            block_id2 += 1
+            break
+
+
 # 体積3のL字ブロックの数が多い方の組(more)を少ない方の組に合わせる
 equalize_block_cnt_to_fewer()
 
@@ -147,7 +186,7 @@ for i in range(2):
         if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
             continue
 
-        for dx, dy, dz in diff:
+        for dx, dy, dz in d:
             x2, y2, z2 = x + dx, y + dy, z + dz
             if not can_fill(x2, y2, z2, i):
                 continue
