@@ -1,3 +1,5 @@
+from copy import deepcopy
+from itertools import permutations
 from typing import List
 
 
@@ -18,7 +20,7 @@ def input_():
 D, f, r = input_()
 
 xyz = [(x, y, z) for x in range(D) for y in range(D) for z in range(D)]
-d = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
+diff = [[1, 0, 0], [0, 1, 0], [0, 0, 1], [-1, 0, 0], [0, -1, 0], [0, 0, -1]]
 b = [[0 for _ in range(D**3)] for _ in range(2)]
 block_id = 0
 
@@ -61,37 +63,6 @@ def silhouette(i: int, x: int, y: int, z: int):
     r_silhouetted[i][z][y] = 1
 
 
-# 共通した連結成分をDFSで埋める
-def fill_connected_component(x: int, y: int, z: int, block_id: int):
-    global b
-    global is_overlapped
-    global can_filled
-    global f_silhouetted
-    global r_silhouetted
-    if not (can_fill(x, y, z) and is_overlapped[x][y][z]):
-        return
-    position = positon_1d(x, y, z)
-    b[0][position] = b[1][position] = block_id
-    is_overlapped[x][y][z] = 0
-    for i in range(2):
-        silhouette(i, x, y, z)
-        can_filled[i][x][y][z] = 0
-
-    for dx, dy, dz in d:
-        fill_connected_component(x + dx, y + dy, z + dz, block_id)
-
-
-for x, y, z in xyz:
-    if is_overlapped[x][y][z]:
-        # 隣接した共通ブロックがあるとき(1x1x1でないとき)のみ埋める
-        for dx, dy, dz in d:
-            x2, y2, z2 = x + dx, y + dy, z + dz
-            if can_fill(x2, y2, z2) and is_overlapped[x2][y2][z2]:
-                block_id += 1
-                fill_connected_component(x, y, z, block_id)
-                break
-
-
 def equalize_block_cnt_to_fewer():
     global b
     global f_silhouetted
@@ -110,101 +81,173 @@ def equalize_block_cnt_to_fewer():
             f_silhouetted[more][z][x] = int(f_silhouette_faded)
 
 
-# TODO:diffsをどうやって用意するか
-# TODO:一つサンプルを挙げたら軸違い、符号違いを全部生成するようにしたい
-# 3x3x3の中心を[0,0,0]としたベクトルでブロックを表現する。len(blocks[i])=ブロック1個の単位ブロック数
-blocks = [
-    [[1, 1, 0], [1, 0, 0], [0, 1, 0], [0, 0, 0]],
-    [[-1, 1, 0], [-1, 0, 0], [0, 1, 0], [0, 0, 0]],
-    [[1, -1, 0], [1, 0, 0], [0, -1, 0], [0, 0, 0]],
-    [[-1, -1, 0], [-1, 0, 0], [0, -1, 0], [0, 0, 0]],
-    [[0, 1, 1], [0, 0, 1], [0, 1, 0], [0, 0, 0]],
-    [[0, 1, 1], [0, 0, 1], [0, 1, 0], [0, 0, 0]],
-    [[0, -1, 1], [0, 0, 1], [0, -1, 0], [0, 0, 0]],
-    [[0, -1, 1], [0, 0, 1], [0, -1, 0], [0, 0, 0]],
-    [[1, 0, 1], [1, 0, 0], [0, 0, 1], [0, 0, 0]],
-    [[-1, 0, 1], [-1, 0, 0], [0, 0, 1], [0, 0, 0]],
-    [[1, 0, 1], [1, 0, 0], [0, 0, 1], [0, 0, 0]],
-    [[-1, 0, 1], [-1, 0, 0], [0, 0, 1], [0, 0, 0]],
+# block_sampleはblockを構成する任意の1単位ブロックを[0,0,0]とした[dx,dy,dz]のベクトルで表現する
+block_samples = [
+    # 3x3x3型
+    [
+        [-1, -1, -1],
+        [-1, -1, 0],
+        [-1, -1, 1],
+        [-1, 0, -1],
+        [-1, 0, 0],
+        [-1, 0, 1],
+        [-1, 1, -1],
+        [-1, 1, 0],
+        [-1, 1, 1],
+        [0, -1, -1],
+        [0, -1, 0],
+        [0, -1, 1],
+        [0, 0, -1],
+        [0, 0, 0],
+        [0, 0, 1],
+        [0, 1, -1],
+        [0, 1, 0],
+        [0, 1, 1],
+        [1, -1, -1],
+        [1, -1, 0],
+        [1, -1, 1],
+        [1, 0, -1],
+        [1, 0, 0],
+        [1, 0, 1],
+        [1, 1, -1],
+        [1, 1, 0],
+        [1, 1, 1],
+    ],
+    # 3x3x2型
+    [
+        [-1, -1, 0],
+        [-1, -1, 1],
+        [-1, 0, 0],
+        [-1, 0, 1],
+        [-1, 1, 0],
+        [-1, 1, 1],
+        [0, -1, 0],
+        [0, -1, 1],
+        [0, 0, 0],
+        [0, 0, 1],
+        [0, 1, 0],
+        [0, 1, 1],
+        [1, -1, 0],
+        [1, -1, 1],
+        [1, 0, 0],
+        [1, 0, 1],
+        [1, 1, 0],
+        [1, 1, 1],
+    ],
+    # 3x2x2
+    [
+        [-1, -1, -1],
+        [-1, -1, 0],
+        [-1, 0, -1],
+        [-1, 0, 0],
+        [0, -1, -1],
+        [0, -1, 0],
+        [0, 0, -1],
+        [0, 0, 0],
+        [1, -1, -1],
+        [1, -1, 0],
+        [1, 0, -1],
+        [1, 0, 0],
+    ],
+    # 3x3x1
+    [
+        [-1, -1, 0],
+        [-1, 0, 0],
+        [-1, 1, 0],
+        [0, -1, 0],
+        [0, 0, 0],
+        [0, 1, 0],
+        [1, -1, 0],
+        [1, 0, 0],
+        [1, 1, 0],
+    ],
+    # 2x2x2
+    [
+        [-1, -1, -1],
+        [-1, -1, 0],
+        [-1, 0, -1],
+        [-1, 0, 0],
+        [0, -1, -1],
+        [0, -1, 0],
+        [0, 0, -1],
+        [0, 0, 0],
+    ],
+    # 3x2x1
+    [[-1, -1, -1], [-1, 0, -1], [0, -1, -1], [0, 0, -1], [1, -1, -1], [1, 0, -1]],
+    # 2x2x1形ブロック
+    [
+        [1, 1, 0],
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 0],
+    ],
+    # 体積4,T字型ブロック
+    [[1, 0, 0], [0, 1, 0], [-1, 0, 0], [0, 0, 0]],
+    # 体積3,L字型ブロック
+    [[1, 0, 0], [0, 1, 0], [0, 0, 0]],
+    # 3x1x1型ブロック
+    [[1, 0, 0], [0, 0, 0], [-1, 0, 0]],
+    # 2x1x1型ブロック
+    [[1, 0, 0], [0, 0, 0]],
 ]
 
 
-for i in range(2):
-    block_id2 = block_id + 1
-    for x, y, z in xyz:
-        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
-            continue
-        for block in blocks:
-            if not all(can_fill(x + dx, y + dy, z + dz, i) for dx, dy, dz in block):
+def generate_rotated_blocks(block_samples: List[List[List[int]]]):
+    """
+    block_samples内の
+    block_sample一つにつき、同じ形で、回転させた24パターンのblockを生成する
+    """
+
+    def shuffle(block_sample: List[List[int]], string: str):
+        block_sample2 = deepcopy(block_sample)
+        for i in range(len(block_sample2)):
+            for j in range(3):
+                # ord(x)=120
+                block_sample2[i][ord(string[j]) - 120] = block_sample[i][j]
+
+        return block_sample2
+
+    signs = [[1, 1, 1], [-1, -1, 1], [1, -1, -1], [-1, 1, -1]]
+    blocks: List[List[List[List[int]]]] = []
+
+    for block_sample in block_samples:
+        inner_blocks: List[List[List[int]]] = []
+
+        for i in permutations("xyz"):
+            block_sample = shuffle(block_sample, "".join(i))
+
+            for sx, sy, sz in signs:
+                inner_blocks.append(
+                    list(map(lambda x: [sx * x[0], sy * x[1], sz * x[2]], block_sample))
+                )
+        blocks.append(inner_blocks)
+
+    return blocks
+
+
+blocks = generate_rotated_blocks(block_samples)
+for block in blocks:
+    for i in range(2):
+        block_id2 = block_id + 1
+        for x, y, z in xyz:
+            if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
                 continue
-            for dx, dy, dz in block:
-                can_filled[i][x + dx][y + dy][z + dz] = 0
-                silhouette(i, x + dx, y + dy, z + dz)
-                b[i][positon_1d(x + dx, y + dy, z + dz)] = block_id2
+            for rotated_block in block:
+                if not all(
+                    can_fill(x + dx, y + dy, z + dz, i) for dx, dy, dz in rotated_block
+                ):
+                    continue
+                for dx, dy, dz in rotated_block:
+                    can_filled[i][x + dx][y + dy][z + dz] = 0
+                    silhouette(i, x + dx, y + dy, z + dz)
+                    b[i][positon_1d(x + dx, y + dy, z + dz)] = block_id2
 
-            block_id2 += 1
-            break
-
-
-equalize_block_cnt_to_fewer()
-block_id = max_2d(b)
-# L字型の体積3のブロックで埋める
-for i in range(2):
-    block_id2 = block_id + 1
-    for x, y, z in xyz:
-        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
-            continue
-        for (dx1, dy1, dz1), (dx2, dy2, dz2) in zip(d, [d[-1]] + d[:-1]):
-            x2, y2, z2 = x + dx1, y + dy1, z + dz1
-            x3, y3, z3 = x + dx2, y + dy2, z + dz2
-            if not (can_fill(x2, y2, z2, i) and can_fill(x3, y3, z3, i)):
-                continue
-
-            can_filled[i][x][y][z] = 0
-            can_filled[i][x2][y2][z2] = 0
-            can_filled[i][x3][y3][z3] = 0
-            silhouette(i, x, y, z)
-            silhouette(i, x2, y2, z2)
-            silhouette(i, x3, y3, z3)
-            b[i][positon_1d(x, y, z)] = block_id2
-            b[i][positon_1d(x2, y2, z2)] = block_id2
-            b[i][positon_1d(x3, y3, z3)] = block_id2
-            block_id2 += 1
-            break
-
-
-# 体積3のL字ブロックの数が多い方の組(more)を少ない方の組に合わせる
-equalize_block_cnt_to_fewer()
-
-# TODO:block_idのうまいやり方を考える
-block_id = max_2d(b)
-
-# 2x1x1の形のブロックでシルエットがまだない部分をできるだけ埋める(A組,B組のブロック数の違いは一旦無視してあとで調整)
-for i in range(2):
-    block_id2 = block_id + 1
-    for x, y, z in xyz:
-        if is_silhouetted(i, x, y, z) or not can_fill(x, y, z, i):
-            continue
-
-        for dx, dy, dz in d:
-            x2, y2, z2 = x + dx, y + dy, z + dz
-            if not can_fill(x2, y2, z2, i):
-                continue
-
-            can_filled[i][x][y][z] = 0
-            can_filled[i][x2][y2][z2] = 0
-            silhouette(i, x, y, z)
-            silhouette(i, x2, y2, z2)
-            b[i][positon_1d(x, y, z)] = block_id2
-            b[i][positon_1d(x2, y2, z2)] = block_id2
-            block_id2 += 1
-            break
-
-# 2x1x1ブロックの数が多い方の組を少ない方の組に合わせる
-equalize_block_cnt_to_fewer()
+                block_id2 += 1
+                break
+    equalize_block_cnt_to_fewer()
+    block_id = max_2d(b)
 
 # 1x1x1のブロックで残りを埋める
-block_id = max_2d(b)
 for i in range(2):
     block_id2 = block_id + 1
     for x, y, z in xyz:
