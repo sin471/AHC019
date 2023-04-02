@@ -82,6 +82,7 @@ def equalize_block_cnt_to_fewer():
 
 
 # block_sampleはblockを構成する任意の1単位ブロックを[0,0,0]とした[dx,dy,dz]のベクトルで表現する
+# 手前にあるブロックほど先に試行されるので、体積の大きいブロックをlistの手前に置く
 block_samples = [
     # 3x3x3型
     [
